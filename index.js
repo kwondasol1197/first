@@ -2,8 +2,12 @@ const express = require('express');
 const app = express();
 const port = 8080;
 const mongoose = require('mongoose');
-
-mongoose.connect("mongodb+srv://dasol1397:1123aasz@cluster0.dqivz.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0").then(() => {
+const bodyParser = require('body-parser');
+const { User } =  require('./models/User');
+const config = require('./config/key')
+app.use(bodyParser.urlencoded({extended: true}));
+app.use(bodyParser.json());
+mongoose.connect(config.mongoURI).then(() => {
     console.log('MongoDB connected');
 }).catch((err) => {
     console.log(err)
@@ -12,6 +16,14 @@ mongoose.connect("mongodb+srv://dasol1397:1123aasz@cluster0.dqivz.mongodb.net/?r
 app.get('/', (req,res)=>{
     res.send('hi~');
     res.end();
+})
+
+app.post('/register', async(req,res) => {
+    const user =  new User(req.body);
+    const result = await user.save().then(()=>
+    console.log(res.json({success:true}))).catch((err)=>{
+        console.log(res.json({success:false,err}));
+    })
 })
 
 app.listen(port, ()=>{
